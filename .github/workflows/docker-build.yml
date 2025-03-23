@@ -34,8 +34,8 @@ jobs:
       - name: 🐳 Build and push to GHCR
         uses: docker/build-push-action@v5
         with:
-          context: ./builds/openresty
-          file: ./builds/openresty/Dockerfile
+          context: ./
+          file: ./Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
           tags: |

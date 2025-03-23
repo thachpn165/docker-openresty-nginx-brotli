@@ -1,0 +1,44 @@
+name: 🔧 Build & Push OpenResty + Brotli to GHCR
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    name: 🐳 Build multi-arch Docker image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: 🔄 Checkout source
+        uses: actions/checkout@v3
+
+      - name: 🔐 Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🏗️ Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: 📆 Tạo tag theo ngày (ví dụ 20240323)
+        id: date
+        run: echo "tag_date=$(date +%Y%m%d)" >> $GITHUB_OUTPUT
+
+      - name: 🐳 Build and push to GHCR
+        uses: docker/build-push-action@v5
+        with:
+          context: ./builds/openresty
+          file: ./builds/openresty/Dockerfile
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ghcr.io/${{ github.repository }}:latest
+            ghcr.io/${{ github.repository }}:openresty-brotli
+            ghcr.io/${{ github.repository }}:${{ steps.date.outputs.tag_date }}
